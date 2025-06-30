@@ -1,5 +1,5 @@
 
-from flask import Flask, jsonify
+from flask import Flask, jsonify, send_from_directory
 import requests
 import os
 
@@ -20,6 +20,10 @@ def get_documents():
         return jsonify({"error": "Failed to fetch data"}), 500
     data = response.json()
     return jsonify(data["records"])
+
+@app.route("/openapi.yaml")
+def serve_openapi():
+    return send_from_directory(os.path.dirname(os.path.abspath(__file__)), "openapi.yaml")
 
 if __name__ == "__main__":
     app.run(debug=True)
