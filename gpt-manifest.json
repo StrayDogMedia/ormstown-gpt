@@ -1,0 +1,16 @@
+
+{
+  "schema_version": "v1",
+  "name_for_model": "ormstown_airtable_reader",
+  "name_for_human": "Ormstown Airtable Reader",
+  "description_for_model": "Fetches documents and meeting records from Airtable for Ormstown council tracking.",
+  "description_for_human": "Access and summarize council records stored in Airtable.",
+  "api": {
+    "type": "openapi",
+    "url": "https://your-backend-host.com/openapi.yaml",
+    "is_user_authenticated": false
+  },
+  "auth": {
+    "type": "none"
+  }
+}

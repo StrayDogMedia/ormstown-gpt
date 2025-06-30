@@ -1,0 +1,22 @@
+
+openapi: 3.0.1
+info:
+  title: Ormstown Airtable API
+  version: "1.0"
+paths:
+  /documents:
+    get:
+      operationId: getDocuments
+      summary: List records from the Documents table
+      responses:
+        "200":
+          description: A list of document records
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  records:
+                    type: array
+                    items:
+                      type: object
