@@ -3,6 +3,8 @@ openapi: 3.0.1
 info:
   title: Ormstown Airtable API
   version: "1.0"
+servers:
+  - url: https://ormstown-gpt.onrender.com
 paths:
   /documents:
     get:
@@ -20,3 +22,12 @@ paths:
                     type: array
                     items:
                       type: object
+                      properties:
+                        id:
+                          type: string
+                        fields:
+                          type: object
+                          additionalProperties: true
+                        createdTime:
+                          type: string
+                          format: date-time
