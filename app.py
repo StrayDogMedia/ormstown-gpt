@@ -1,53 +1,41 @@
-from flask import Flask, request
-import pandas as pd
-import requests
+import csv
 import os
+from flask import Flask, request, jsonify
+from pyairtable import Table
+from pyairtable.formulas import match
 
 app = Flask(__name__)
 
-# Airtable configuration
 AIRTABLE_API_KEY = os.getenv("AIRTABLE_API_KEY")
-BASE_ID = "app8k5RQqX7xSAVbx"
+BASE_ID = "appXXXXXXXXXXXXXX"  # ← Replace with your real base ID
 TABLE_NAME = "Council Minutes"
-AIRTABLE_URL = f"https://api.airtable.com/v0/{BASE_ID}/{TABLE_NAME}"
-HEADERS = {
-    "Authorization": f"Bearer {AIRTABLE_API_KEY}",
-    "Content-Type": "application/json"
-}
 
 @app.route("/")
-def index():
+def home():
     return "Ormstown GPT Backend is Running"
 
 @app.route("/load_csv", methods=["POST"])
-def load_csv():
+def load_csv_to_airtable():
+    if not AIRTABLE_API_KEY:
+        return jsonify({"error": "Missing Airtable API key"}), 500
+
     try:
-        path = "airtable_final_batch.csv"
-        df = pd.read_csv(path)
+        table = Table(AIRTABLE_API_KEY, BASE_ID, TABLE_NAME)
 
-        records = []
-        for _, row in df.iterrows():
-            fields = {
-                "Date": row["Date"],
-                "Type": row["Type"],
-                "Title": row["Title"],
-                "Summary": row["Summary"],
-                "Adopted Resolutions": row["Adopted Resolutions"],
-                "Source PDF": row["Source PDF"]
-            }
-            records.append({"fields": fields})
+        with open("airtable_final_batch.csv", newline="", encoding="utf-8") as csvfile:
+            reader = csv.DictReader(csvfile)
+            records = [row for row in reader]
 
-        for i in range(0, len(records), 10):
-            batch = {"records": records[i:i+10]}
-            r = requests.post(AIRTABLE_URL, headers=HEADERS, json=batch)
-            if r.status_code != 200:
-                return f"Error: {r.status_code} - {r.text}", 500
+            for record in records:
+                # Optional: check if record already exists
+                existing = table.first(formula=match({"Date": record["Date"], "Title": record["Title"]}))
+                if not existing:
+                    table.create(record)
 
-        return "Successfully uploaded to Airtable", 200
-
+        return jsonify({"message": "CSV uploaded to Airtable successfully."}), 200
     except Exception as e:
-        return str(e), 500
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port)
+    app.run(debug=True)
+
